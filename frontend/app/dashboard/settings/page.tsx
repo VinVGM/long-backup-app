@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { getCurrentUserProfile, cancelSubscription, UserProfile } from "@/lib/api"
-import { UsageBar } from "@/components/UsageBar"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 const planLabels: Record<string, string> = {
   free: "Free (1 GB)",
@@ -12,10 +16,16 @@ const planLabels: Record<string, string> = {
   business_2tb: "Business (2 TB)",
 }
 
+const planColors: Record<string, string> = {
+  free: "secondary",
+  basic_100gb: "default",
+  pro_500gb: "default",
+  business_2tb: "default",
+} as const
+
 export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [cancelMsg, setCancelMsg] = useState("")
 
@@ -29,13 +39,12 @@ export default function SettingsPage() {
   }, [])
 
   const handleCancel = async () => {
-    setShowCancelConfirm(false)
     setCancelling(true)
     try {
       await cancelSubscription()
       setCancelMsg("Plan cancelled. You are now on Free (1 GB).")
       loadProfile()
-    } catch (err: any) {
+    } catch {
       setCancelMsg("")
     } finally {
       setCancelling(false)
@@ -45,91 +54,91 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     )
   }
 
   const isFree = !profile || profile.plan === "free"
   const planLabel = planLabels[profile?.plan || "free"] || "Free (1 GB)"
+  const planColor = (planColors[profile?.plan || "free"] || "secondary") as "default" | "secondary"
+  const usedBytes = profile?.storageUsedBytes || 0
+  const limitBytes = profile?.storageLimitBytes || 1073741824
+  const percent = limitBytes > 0 ? Math.min(Math.round((usedBytes / limitBytes) * 100), 100) : 0
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB"
+    if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + " MB"
+    return (bytes / 1024 / 1024 / 1024).toFixed(2) + " GB"
+  }
 
   return (
-    <div className="max-w-lg mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+    <div className="max-w-lg mx-auto space-y-6">
+      <h1 className="text-2xl font-bold">Settings</h1>
 
       {cancelMsg && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+        <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-500">
           {cancelMsg}
         </div>
       )}
 
-      <div className="bg-white rounded-xl border shadow-sm p-6 space-y-6">
-        <div>
-          <p className="text-sm text-gray-500">Account Email</p>
-          <p className="font-medium">{profile?.email || "—"}</p>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-sm text-gray-500">Plan</p>
-            {isFree && (
-              <Link
-                href="/pricing"
-                className="text-xs text-blue-600 hover:underline font-medium"
-              >
-                Upgrade
-              </Link>
-            )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Account</CardTitle>
+          <CardDescription>Your account details and plan</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <p className="text-sm text-muted-foreground">Email</p>
+            <p className="font-medium">{profile?.email || "—"}</p>
           </div>
-          <p className="font-medium">{planLabel}</p>
-        </div>
 
-        <div>
-          <p className="text-sm text-gray-500 mb-1">Storage Used</p>
-          <UsageBar
-            usedBytes={profile?.storageUsedBytes || 0}
-            limitBytes={profile?.storageLimitBytes || 1073741824}
-          />
-        </div>
-
-        {!isFree && (
-          <div className="pt-2 border-t">
-            <button
-              onClick={() => setShowCancelConfirm(true)}
-              disabled={cancelling}
-              className="text-sm text-red-600 hover:underline"
-            >
-              {cancelling ? "Cancelling..." : "Cancel subscription"}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {showCancelConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-xl">
-            <h3 className="text-lg font-bold mb-2 text-red-600">Cancel Subscription</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              You will be downgraded to the Free plan (1 GB storage limit). Your existing
-              files will be preserved, but you won&apos;t be able to upload new files if
-              you exceed the Free plan limit.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowCancelConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
-              >
-                Keep Plan
-              </button>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Cancel Subscription
-              </button>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm text-muted-foreground">Plan</p>
+              {isFree && (
+                <Link href="/pricing">
+                  <Button variant="link" size="sm" className="h-auto p-0 text-xs">Upgrade</Button>
+                </Link>
+              )}
             </div>
+            <Badge variant={planColor}>{planLabel}</Badge>
           </div>
-        </div>
+
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Storage Used</p>
+            <Progress value={percent} className="h-2.5" />
+            <p className="text-xs text-muted-foreground mt-1">
+              {formatBytes(usedBytes)} / {formatBytes(limitBytes)} ({percent}%)
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {!isFree && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+              Cancel subscription
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
+              <AlertDialogDescription>
+                You will be downgraded to the Free plan (1 GB storage limit). Your existing
+                files will be preserved, but you won&apos;t be able to upload new files if
+                you exceed the Free plan limit.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Plan</AlertDialogCancel>
+              <AlertDialogAction onClick={handleCancel} disabled={cancelling} className="bg-destructive hover:bg-destructive/90">
+                {cancelling ? "Cancelling..." : "Cancel Subscription"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   )

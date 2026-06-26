@@ -3,8 +3,9 @@
 import { useState } from "react"
 import { resetPassword, confirmResetPassword } from "aws-amplify/auth"
 import Link from "next/link"
+import { GuestGuard } from "@/components/GuestGuard"
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
   const [code, setCode] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -112,4 +113,8 @@ export default function ForgotPasswordPage() {
       </div>
     </div>
   )
+}
+
+export default function ForgotPasswordPage() {
+  return <GuestGuard><ForgotPasswordForm /></GuestGuard>
 }

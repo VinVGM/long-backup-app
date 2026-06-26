@@ -4,8 +4,13 @@ import { useState } from "react"
 import { confirmSignUp, resendSignUpCode } from "aws-amplify/auth"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { GuestGuard } from "@/components/GuestGuard"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { HardDrive } from "lucide-react"
 
-export default function ConfirmPage() {
+function ConfirmForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get("email") || ""
@@ -84,4 +89,8 @@ export default function ConfirmPage() {
       </div>
     </div>
   )
+}
+
+export default function ConfirmPage() {
+  return <GuestGuard><ConfirmForm /></GuestGuard>
 }

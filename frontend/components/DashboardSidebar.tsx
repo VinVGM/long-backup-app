@@ -3,12 +3,15 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOut } from "aws-amplify/auth"
+import { HardDrive, Upload, Archive, CreditCard, Settings, LogOut } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 const navItems = [
-  { href: "/dashboard/upload", label: "Upload" },
-  { href: "/dashboard/archives", label: "Archives" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard/upload", label: "Upload", icon: Upload },
+  { href: "/dashboard/archives", label: "Archives", icon: Archive },
+  { href: "/pricing", label: "Pricing", icon: CreditCard },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
 
 export function DashboardSidebar() {
@@ -21,10 +24,11 @@ export function DashboardSidebar() {
   }
 
   return (
-    <aside className="w-56 bg-white border-r shrink-0 flex flex-col">
-      <div className="p-4 border-b">
-        <Link href="/dashboard/archives" className="text-lg font-bold text-blue-600">
-          LongBackup
+    <aside className="w-56 bg-card border-r border-border shrink-0 flex flex-col">
+      <div className="p-4 border-b border-border">
+        <Link href="/dashboard/archives" className="flex items-center gap-2 font-bold text-lg">
+          <HardDrive className="h-5 w-5 text-primary" />
+          <span>LongBackup</span>
         </Link>
       </div>
 
@@ -35,23 +39,30 @@ export function DashboardSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`block px-3 py-2 rounded-lg text-sm font-medium ${
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                 active
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
             >
+              <item.icon className="h-4 w-4" />
               {item.label}
             </Link>
           )
         })}
       </nav>
 
-      <div className="p-3 border-t">
+      <div className="p-3 border-t border-border space-y-1">
+        <div className="flex items-center justify-between px-3 py-2">
+          <span className="text-xs text-muted-foreground">Theme</span>
+          <ThemeToggle />
+        </div>
         <button
           onClick={handleSignOut}
-          className="w-full px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg text-left"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
+          <LogOut className="h-4 w-4" />
           Sign Out
         </button>
       </div>

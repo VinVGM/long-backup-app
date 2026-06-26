@@ -3,7 +3,19 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { listArchives, batchRestore, Archive } from "@/lib/api"
-import { ArchiveStatusBadge } from "@/components/ArchiveStatusBadge"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ArchiveIcon, Upload } from "lucide-react"
+
+const statusVariant: Record<string, "uploading" | "stored" | "restoring" | "ready" | "expired"> = {
+  uploading: "uploading",
+  stored: "stored",
+  restoring: "restoring",
+  ready: "ready",
+  expired: "expired",
+}
 
 export default function ArchivesPage() {
   const [archives, setArchives] = useState<Archive[]>([])
@@ -48,12 +60,8 @@ export default function ArchivesPage() {
   const toggleAll = () => {
     const restorableIds = archives.filter(isRestorable).map((a) => a.archiveId)
     const allSelected = restorableIds.every((id) => selected.has(id))
-    if (allSelected) {
-      setSelected(new Set())
-    } else {
-      const next = new Set(restorableIds)
-      setSelected(next)
-    }
+    if (allSelected) setSelected(new Set())
+    else setSelected(new Set(restorableIds))
   }
 
   const handleBatchRestore = async () => {
@@ -85,129 +93,116 @@ export default function ArchivesPage() {
     })
   }
 
-  const restorableCount = archives.filter(isRestorable).length
-
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Archives</h1>
-        <Link
-          href="/dashboard/upload"
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
-        >
-          + Upload
+        <Link href="/dashboard/upload">
+          <Button size="sm">
+            <Upload className="mr-2 h-4 w-4" />
+            Upload
+          </Button>
         </Link>
       </div>
 
-      {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-      {restoreMsg && <p className="text-green-600 text-sm mb-4">{restoreMsg}</p>}
-      {!loading && restorableCount === 0 && archives.length > 0 && (
-        <p className="text-xs text-gray-400 mb-3">
-          No archives are eligible for restore. Archives must be in Deep Archive (stored) status.
-        </p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {restoreMsg && <p className="text-sm text-green-500">{restoreMsg}</p>}
 
       {selected.size > 0 && (
-        <div className="mb-4 flex items-center gap-3">
-          <p className="text-sm text-gray-600">{selected.size} selected</p>
-          <button
-            onClick={() => setSelected(new Set())}
-            className="text-xs text-gray-500 hover:underline"
-          >
-            Clear
-          </button>
-          <button
-            onClick={handleBatchRestore}
-            disabled={restoring}
-            className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
+        <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg border border-border">
+          <p className="text-sm text-muted-foreground">{selected.size} selected</p>
+          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Clear</Button>
+          <Button size="sm" onClick={handleBatchRestore} disabled={restoring}>
             {restoring ? "Restoring..." : `Restore Selected (${selected.size})`}
-          </button>
+          </Button>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        {archives.length === 0 && !loading && (
-          <div className="p-8 text-center text-gray-500">
-            <p className="text-lg mb-2">No archives yet</p>
-            <p className="text-sm">Upload your first ZIP archive to get started.</p>
-          </div>
-        )}
+      <Card>
+        <CardContent className="p-0">
+          {loading && (
+            <div className="p-6 space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              ))}
+            </div>
+          )}
 
-        {archives.length > 0 && (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50 text-left">
-                <th className="px-4 py-3 w-10">
-                  {archives.some(isRestorable) && (
-                    <input
-                      type="checkbox"
-                      checked={archives.filter(isRestorable).every((a) => selected.has(a.archiveId))}
-                      onChange={toggleAll}
-                      className="rounded"
-                    />
-                  )}
-                </th>
-                <th className="px-4 py-3 font-medium">Filename</th>
-                <th className="px-4 py-3 font-medium">Size</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Uploaded</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {archives.map((a) => (
-                <tr key={a.archiveId} className="border-b last:border-0 hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    {isRestorable(a) ? (
+          {!loading && archives.length === 0 && (
+            <div className="p-12 text-center text-muted-foreground space-y-4">
+              <ArchiveIcon className="h-12 w-12 mx-auto opacity-30" />
+              <p className="text-lg">No archives yet</p>
+              <p className="text-sm">Upload your first ZIP archive to get started.</p>
+              <Link href="/dashboard/upload">
+                <Button size="sm">Upload Archive</Button>
+              </Link>
+            </div>
+          )}
+
+          {archives.length > 0 && (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-secondary/30 text-left">
+                  <th className="px-4 py-3 w-10">
+                    {archives.some(isRestorable) && (
                       <input
                         type="checkbox"
-                        checked={selected.has(a.archiveId)}
-                        onChange={() => toggleSelect(a.archiveId)}
+                        checked={archives.filter(isRestorable).every((a) => selected.has(a.archiveId))}
+                        onChange={toggleAll}
                         className="rounded"
                       />
-                    ) : (
-                      <span className="text-gray-300 text-xs ml-1">—</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3 font-medium truncate max-w-[200px]">{a.filename}</td>
-                  <td className="px-4 py-3 text-gray-600">{formatSize(a.sizeBytes)}</td>
-                  <td className="px-4 py-3">
-                    <ArchiveStatusBadge status={a.status} />
-                    {a.storageClass === "DEEP_ARCHIVE" && (
-                      <span className="ml-1.5 text-[10px] text-gray-400">DA</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{formatDate(a.createdAt)}</td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/dashboard/archives/${a.archiveId}`}
-                      className="text-blue-600 hover:underline text-sm"
-                    >
-                      Details
-                    </Link>
-                  </td>
+                  </th>
+                  <th className="px-4 py-3 font-medium">Filename</th>
+                  <th className="px-4 py-3 font-medium">Size</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Uploaded</th>
+                  <th className="px-4 py-3" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {archives.map((a) => (
+                  <tr key={a.archiveId} className="border-b border-border last:border-0 hover:bg-accent/50">
+                    <td className="px-4 py-3">
+                      {isRestorable(a) ? (
+                        <input type="checkbox" checked={selected.has(a.archiveId)} onChange={() => toggleSelect(a.archiveId)} className="rounded" />
+                      ) : (
+                        <span className="text-muted-foreground text-xs ml-1">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 font-medium truncate max-w-[200px]">{a.filename}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatSize(a.sizeBytes)}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant={statusVariant[a.status] || "secondary"}>{a.status}</Badge>
+                      {a.storageClass === "DEEP_ARCHIVE" && a.status === "stored" && (
+                        <span className="ml-1.5 text-[10px] text-muted-foreground">DA</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDate(a.createdAt)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href={`/dashboard/archives/${a.archiveId}`} className="text-primary hover:underline text-sm">
+                        Details
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
 
-        {loading && (
-          <div className="p-4 text-center text-gray-500 text-sm">Loading...</div>
-        )}
-
-        {nextToken && !loading && (
-          <div className="p-4 text-center">
-            <button
-              onClick={() => load(nextToken)}
-              className="text-blue-600 hover:underline text-sm"
-            >
-              Load more
-            </button>
-          </div>
-        )}
-      </div>
+          {nextToken && !loading && (
+            <div className="p-4 text-center border-t border-border">
+              <Button variant="link" size="sm" onClick={() => load(nextToken)}>Load more</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
