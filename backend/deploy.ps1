@@ -9,7 +9,12 @@ param(
     [string]$DynamoDBArchivesTable,
 
     [Parameter(Mandatory = $true)]
+    [string]$DynamoDBRestoreJobsTable,
+
+    [Parameter(Mandatory = $true)]
     [string]$LambdaRoleArn,
+
+    [string]$SESFromEmail = "",
 
     [string]$Region = "us-east-1",
 
@@ -24,13 +29,25 @@ Set-Location -LiteralPath $PSScriptRoot
 $StartTime = Get-Date
 
 $Functions = @(
-    @{ Name = "longbackup-upload-request";  Dir = "upload-request" },
-    @{ Name = "longbackup-upload-complete"; Dir = "upload-complete" },
-    @{ Name = "longbackup-list-archives";   Dir = "list-archives" },
-    @{ Name = "longbackup-get-archive";     Dir = "get-archive" }
+    @{ Name = "longbackup-upload-request";       Dir = "upload-request" },
+    @{ Name = "longbackup-upload-complete";      Dir = "upload-complete" },
+    @{ Name = "longbackup-list-archives";        Dir = "list-archives" },
+    @{ Name = "longbackup-get-archive";          Dir = "get-archive" },
+    @{ Name = "longbackup-initiate-restore";     Dir = "initiate-restore" },
+    @{ Name = "longbackup-check-restore-status"; Dir = "check-restore-status" },
+    @{ Name = "longbackup-generate-download-url";Dir = "generate-download-url" },
+    @{ Name = "longbackup-get-user-profile";     Dir = "get-user-profile" },
+    @{ Name = "longbackup-create-razorpay-order";Dir = "create-razorpay-order" },
+    @{ Name = "longbackup-verify-razorpay-payment";Dir = "verify-razorpay-payment" },
+    @{ Name = "longbackup-delete-archive";         Dir = "delete-archive" },
+    @{ Name = "longbackup-batch-restore";          Dir = "batch-restore" },
+    @{ Name = "longbackup-cancel-subscription";    Dir = "cancel-subscription" }
 )
 
-$envList = "S3_BUCKET=$S3Bucket,DYNAMODB_TABLE_USERS=$DynamoDBUsersTable,DYNAMODB_TABLE_ARCHIVES=$DynamoDBArchivesTable"
+$envList = "S3_BUCKET=$S3Bucket,DYNAMODB_TABLE_USERS=$DynamoDBUsersTable,DYNAMODB_TABLE_ARCHIVES=$DynamoDBArchivesTable,DYNAMODB_TABLE_RESTORE_JOBS=$DynamoDBRestoreJobsTable"
+if ($SESFromEmail -ne "") {
+    $envList += ",SES_FROM_EMAIL=$SESFromEmail"
+}
 
 # ===================================================
 if (-not $SkipBuild) {
@@ -222,12 +239,18 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Next steps (manual):" -ForegroundColor Yellow
 Write-Host "  1. Create API Gateway HTTP API with JWT authorizer (Cognito)" -ForegroundColor White
-Write-Host "  2. Add 3 routes:" -ForegroundColor White
-Write-Host "       POST /upload/request  => longbackup-upload-request" -ForegroundColor White
-Write-Host "       GET  /archives        => longbackup-list-archives" -ForegroundColor White
-Write-Host "       GET  /archives/{id}   => longbackup-get-archive" -ForegroundColor White
+Write-Host "  2. Add 5 routes:" -ForegroundColor White
+Write-Host "       POST /upload/request               => longbackup-upload-request" -ForegroundColor White
+Write-Host "       GET  /archives                     => longbackup-list-archives" -ForegroundColor White
+Write-Host "       GET  /archives/{id}                => longbackup-get-archive" -ForegroundColor White
+Write-Host "       POST /archives/{id}/restore        => longbackup-initiate-restore" -ForegroundColor White
+Write-Host "       GET  /archives/{id}/download       => longbackup-generate-download-url" -ForegroundColor White
 Write-Host "  3. Enable CORS in API Gateway" -ForegroundColor White
-Write-Host "  4. Set frontend .env.local:" -ForegroundColor White
+Write-Host "  4. Create DynamoDB table RestoreJobs (PK: userId, SK: archiveId)" -ForegroundColor White
+Write-Host "  5. Enable S3 EventBridge integration on S3 bucket" -ForegroundColor White
+Write-Host "  6. Create EventBridge rule LongBackupRestoreCompleted for Object Restore Completed events" -ForegroundColor White
+Write-Host "  7. Verify SES sender email and set SES_FROM_EMAIL env var" -ForegroundColor White
+Write-Host "  8. Set frontend .env.local:" -ForegroundColor White
 Write-Host "       NEXT_PUBLIC_API_URL = <API Gateway Invoke URL>" -ForegroundColor White
 Write-Host "       NEXT_PUBLIC_COGNITO_USER_POOL_ID = <Pool ID>" -ForegroundColor White
 Write-Host "       NEXT_PUBLIC_COGNITO_CLIENT_ID = <Client ID>" -ForegroundColor White

@@ -1,6 +1,6 @@
 .PHONY: build clean deploy-all
 
-FUNCTIONS := upload-request upload-complete list-archives get-archive
+FUNCTIONS := upload-request upload-complete list-archives get-archive initiate-restore check-restore-status generate-download-url get-user-profile create-razorpay-order verify-razorpay-payment delete-archive batch-restore cancel-subscription
 BUILD_DIR := build
 
 build: $(FUNCTIONS)

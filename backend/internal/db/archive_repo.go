@@ -165,6 +165,20 @@ func (r *ArchiveRepository) UpdateStatusWithChecksum(ctx context.Context, userID
 	return nil
 }
 
+func (r *ArchiveRepository) Delete(ctx context.Context, userID, archiveID string) error {
+	_, err := r.client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
+		TableName: aws.String(r.tableName),
+		Key: map[string]types.AttributeValue{
+			"userId":    &types.AttributeValueMemberS{Value: userID},
+			"archiveId": &types.AttributeValueMemberS{Value: archiveID},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("delete archive: %w", err)
+	}
+	return nil
+}
+
 func encodeStartKey(key map[string]types.AttributeValue) (string, error) {
 	// Convert AttributeValue map to JSON-serializable map
 	simple := make(map[string]string)

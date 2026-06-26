@@ -103,7 +103,7 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	}
 
 	s3Helper := s3client.NewHelper(s3Client)
-	presignedURL, err := s3Helper.GeneratePresignedUploadURL(ctx, s3Key, 1*time.Hour)
+	presignedURL, err := s3Helper.GeneratePresignedUploadURLToDeepArchive(ctx, s3Key, 1*time.Hour)
 	if err != nil {
 		log.Printf("generate presigned URL: %v", err)
 		return response.ServerError(err), nil

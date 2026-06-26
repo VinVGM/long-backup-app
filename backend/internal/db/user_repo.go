@@ -81,6 +81,27 @@ func (r *UserRepository) Create(ctx context.Context, userID, email string) error
 	return nil
 }
 
+func (r *UserRepository) UpdatePlan(ctx context.Context, userID, plan string, storageLimit int64) error {
+	_, err := r.client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
+		TableName: aws.String(r.tableName),
+		Key: map[string]types.AttributeValue{
+			"userId": &types.AttributeValueMemberS{Value: userID},
+		},
+		UpdateExpression: aws.String("SET #p = :p, storageLimitBytes = :sl"),
+		ExpressionAttributeNames: map[string]string{
+			"#p": "plan",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":p":  &types.AttributeValueMemberS{Value: plan},
+			":sl": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", storageLimit)},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("update plan: %w", err)
+	}
+	return nil
+}
+
 func (r *UserRepository) UpdateStorageUsed(ctx context.Context, userID string, delta int64) error {
 	_, err := r.client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName: aws.String(r.tableName),

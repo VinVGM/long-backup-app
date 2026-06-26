@@ -7,6 +7,7 @@ import { signOut } from "aws-amplify/auth"
 const navItems = [
   { href: "/dashboard/upload", label: "Upload" },
   { href: "/dashboard/archives", label: "Archives" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/dashboard/settings", label: "Settings" },
 ]
 
