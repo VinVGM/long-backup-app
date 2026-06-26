@@ -1,7 +1,12 @@
 import Link from "next/link"
-import { Shield, HardDrive, Download, Clock, ArrowRight, Check, Server } from "lucide-react"
+import { HardDrive, Download, Clock, Shield, ArrowRight, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { RetroGrid } from "@/components/ui/retro-grid"
+import { ShimmerButton } from "@/components/ui/shimmer-button"
+import { MagicCard } from "@/components/ui/magic-card"
+import { Terminal, TypingAnimation, AnimatedSpan } from "@/components/ui/terminal"
+import NumberTicker from "@/components/ui/number-ticker"
 
 export default function LandingPage() {
   return (
@@ -19,19 +24,15 @@ export default function LandingPage() {
             <Link href="/dashboard/archives" className="hover:text-foreground transition-colors">Dashboard</Link>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/auth/signin">
-              <Button variant="ghost" size="sm">Sign In</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button size="sm">Get Started</Button>
-            </Link>
+            <Link href="/auth/signin"><Button variant="ghost" size="sm">Sign In</Button></Link>
+            <Link href="/auth/signup"><Button size="sm">Get Started</Button></Link>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        <RetroGrid />
         <div className="container mx-auto max-w-5xl text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-border bg-secondary text-sm text-muted-foreground mb-8">
             <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
@@ -45,18 +46,13 @@ export default function LandingPage() {
             Store your backups in AWS Deep Archive at 95% less cost than Google Drive or Dropbox.
             Pay only for what you store. No monthly subscriptions — just storage.
           </p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center">
+          <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
             <Link href="/auth/signup">
-              <Button size="lg" className="h-13 px-8 text-base">
-                Start Free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <ShimmerButton shimmerColor="#ffffff" background="rgba(59, 130, 246, 1)" borderRadius="12px" className="h-12 px-8 text-base font-semibold">
+                Start Free <ArrowRight className="ml-2 h-4 w-4" />
+              </ShimmerButton>
             </Link>
-            <Link href="#features">
-              <Button variant="outline" size="lg" className="h-13 px-8 text-base">
-                Learn More
-              </Button>
-            </Link>
+            <Link href="#features"><Button variant="outline" size="lg" className="h-12 px-8 text-base">Learn More</Button></Link>
           </div>
         </div>
       </section>
@@ -65,17 +61,22 @@ export default function LandingPage() {
       <section className="py-16 border-y border-border">
         <div className="container mx-auto max-w-5xl px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { value: "95%", label: "Cheaper than Google Drive" },
-              { value: "1GB", label: "Free storage to start" },
-              { value: "12-48h", label: "Restore time from Deep Archive" },
-              { value: "99.99%", label: "AWS Durability" },
-            ].map((stat, i) => (
-              <div key={i}>
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1"><NumberTicker value={95} />%</div>
+              <div className="text-sm text-muted-foreground">Cheaper than Google Drive</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1"><NumberTicker value={1} /></div>
+              <div className="text-sm text-muted-foreground">GB Free storage</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1"><NumberTicker value={99} /><span className="text-2xl">.99</span>%</div>
+              <div className="text-sm text-muted-foreground">AWS Durability</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1"><NumberTicker value={10000} />+</div>
+              <div className="text-sm text-muted-foreground">Files Secured</div>
+            </div>
           </div>
         </div>
       </section>
@@ -85,32 +86,15 @@ export default function LandingPage() {
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">How It Works</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Simple, secure, and cost-effective backup storage.
-            </p>
+            <p className="text-muted-foreground max-w-xl mx-auto">Simple, secure, and cost-effective backup storage.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              {
-                icon: Shield,
-                title: "Upload & Forget",
-                desc: "Your files are uploaded directly to AWS Deep Archive — the cheapest storage tier on the planet.",
-                stat: "₹0.08/GB/month",
-              },
-              {
-                icon: Clock,
-                title: "Restore When Needed",
-                desc: "Files transition to Deep Archive after upload. Restore takes 12-48 hours. You'll get an email when ready.",
-                stat: "12-48h restore time",
-              },
-              {
-                icon: Download,
-                title: "Download Anywhere",
-                desc: "48-hour download window with presigned URLs. No app needed — just a browser.",
-                stat: "48h download link",
-              },
+              { icon: Shield, title: "Upload & Forget", desc: "Your files are uploaded directly to AWS Deep Archive — the cheapest storage tier on the planet.", stat: "₹0.08/GB/month" },
+              { icon: Clock, title: "Restore When Needed", desc: "Files transition to Deep Archive after upload. Restore takes 12-48 hours. You'll get an email when ready.", stat: "12-48h restore time" },
+              { icon: Download, title: "Download Anywhere", desc: "48-hour download window with presigned URLs. No app needed — just a browser.", stat: "48h download link" },
             ].map((feature, i) => (
-              <Card key={i} className="group hover:border-primary/50 transition-colors">
+              <MagicCard key={i} className="border-border">
                 <CardContent className="p-6 space-y-4">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                     <feature.icon className="h-6 w-6 text-primary" />
@@ -119,19 +103,47 @@ export default function LandingPage() {
                   <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
                   <div className="pt-2 text-sm font-medium text-primary">{feature.stat}</div>
                 </CardContent>
-              </Card>
+              </MagicCard>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Terminal demo */}
+      <section className="py-16 px-6 bg-secondary/30">
+        <div className="container mx-auto max-w-4xl">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Real-Time <span className="text-primary">Backup Agent</span></h2>
+              <p className="text-muted-foreground mb-8 leading-relaxed">Watch your backups being processed in real-time. Our agent handles everything automatically.</p>
+              <ul className="space-y-3">
+                {["Automatic Deep Archive storage", "End-to-end encryption", "Instant email notifications", "48h download windows"].map((feat, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <Check className="h-4 w-4 text-primary" />{feat}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Terminal>
+              <TypingAnimation className="text-primary font-bold block mb-2">&gt; INITIALIZING BACKUP AGENT...</TypingAnimation>
+              <AnimatedSpan delay={1200} className="text-green-500"><span>✔ [OK] Connected to S3 Deep Archive</span></AnimatedSpan>
+              <AnimatedSpan delay={1800} className="text-green-500"><span>✔ [OK] Storage bucket: longbackup-dev</span></AnimatedSpan>
+              <AnimatedSpan delay={2400} className="text-blue-500"><span>ℹ [INFO] Scanning local files...</span></AnimatedSpan>
+              <AnimatedSpan delay={3000} className="text-green-500"><span>✔ [OK] Found 127 files to backup</span></AnimatedSpan>
+              <AnimatedSpan delay={3600} className="text-yellow-500"><span>⚙ [PROC] Uploading archive_2025_06.zip</span></AnimatedSpan>
+              <AnimatedSpan delay={4200} className="text-green-500"><span>✔ [OK] Upload complete — stored in Deep Archive</span></AnimatedSpan>
+              <AnimatedSpan delay={5000} className="text-yellow-500"><span>⚙ [PROC] Compressing remaining 126 files...</span></AnimatedSpan>
+              <TypingAnimation delay={6000} className="text-primary font-bold block mt-3">&gt; BACKUP AGENT RUNNING</TypingAnimation>
+            </Terminal>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Preview */}
-      <section id="pricing" className="py-20 px-6 bg-secondary/30">
+      <section id="pricing" className="py-20 px-6">
         <div className="container mx-auto max-w-5xl text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-4">Pricing</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto mb-12">
-            Choose a plan that fits your needs. All plans include Deep Archive storage, restores, and email notifications.
-          </p>
+          <p className="text-muted-foreground max-w-xl mx-auto mb-12">Choose a plan that fits your needs.</p>
           <div className="grid md:grid-cols-3 gap-6 mb-10">
             {[
               { name: "Free", price: "₹0", storage: "1 GB", popular: false },
@@ -140,62 +152,37 @@ export default function LandingPage() {
             ].map((plan, i) => (
               <Card key={i} className={`relative ${plan.popular ? "border-primary ring-1 ring-primary" : ""}`}>
                 <CardContent className="p-6 space-y-4">
-                  {plan.popular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                      Most Popular
-                    </span>
-                  )}
+                  {plan.popular && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">Most Popular</span>}
                   <h3 className="text-lg font-bold">{plan.name}</h3>
                   <div className="text-3xl font-bold">{plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                   <p className="text-sm text-muted-foreground">{plan.storage} storage</p>
                   <ul className="space-y-2 text-sm text-left">
                     {["Deep Archive", "Email notifications", "48h download links"].map((feat, j) => (
-                      <li key={j} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-primary" />
-                        {feat}
-                      </li>
+                      <li key={j} className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />{feat}</li>
                     ))}
                   </ul>
-                  <Link href="/auth/signup">
-                    <Button variant={plan.popular ? "default" : "outline"} className="w-full">
-                      {plan.name === "Free" ? "Start Free" : "Subscribe"}
-                    </Button>
-                  </Link>
+                  <Link href="/auth/signup"><Button variant={plan.popular ? "default" : "outline"} className="w-full">{plan.name === "Free" ? "Start Free" : "Subscribe"}</Button></Link>
                 </CardContent>
               </Card>
             ))}
           </div>
-          <Link href="/pricing">
-            <Button variant="link" className="text-muted-foreground">
-              View all plans & pricing details → View all plans & pricing details
-            </Button>
-          </Link>
+          <Link href="/pricing"><Button variant="link" className="text-muted-foreground">View all plans & pricing details →</Button></Link>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 bg-secondary/30">
         <div className="container mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to start backing up?</h2>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Sign up free with 1 GB storage. No credit card required.
-          </p>
-          <Link href="/auth/signup">
-            <Button size="lg" className="h-13 px-8 text-base">
-              Create Free Account
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">Sign up free with 1 GB storage. No credit card required.</p>
+          <Link href="/auth/signup"><Button size="lg" className="h-13 px-8 text-base">Create Free Account <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="py-8 border-t border-border px-6">
         <div className="container mx-auto max-w-5xl flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <HardDrive className="h-4 w-4" />
-            LongBackup
-          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground"><HardDrive className="h-4 w-4" />LongBackup</div>
           <p className="text-xs text-muted-foreground">Powered by AWS S3 Glacier Deep Archive</p>
         </div>
       </footer>

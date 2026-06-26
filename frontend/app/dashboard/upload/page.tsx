@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
-import { Upload, Check, FileArchive, Eye, UploadIcon } from "lucide-react"
+import { AnimatedCheckmark } from "@/components/ui/animated-checkmark"
+import { useToast } from "@/components/ToastProvider"
+import { fireConfetti } from "@/lib/confetti"
+import { Upload, FileArchive, Eye, UploadIcon } from "lucide-react"
 
 export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -18,6 +21,7 @@ export default function UploadPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [archiveId, setArchiveId] = useState("")
+  const toast = useToast()
 
   const handleUpload = async () => {
     if (!file) return
@@ -30,8 +34,11 @@ export default function UploadPage() {
       setArchiveId(res.archiveId)
       await uploadToS3(res.presignedUrl, file, setProgress)
       setSuccess(true)
+      fireConfetti()
+      toast.success("Upload complete!", `${file.name} stored in Deep Archive`)
     } catch (err: any) {
       setError(err?.message || "Upload failed")
+      toast.error("Upload failed", err?.message)
     } finally {
       setUploading(false)
     }
@@ -53,21 +60,15 @@ export default function UploadPage() {
       {success ? (
         <Card>
           <CardContent className="p-8 text-center space-y-4">
-            <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
-              <Check className="h-8 w-8 text-green-500" />
+            <div className="h-16 w-16 mx-auto">
+              <AnimatedCheckmark className="h-16 w-16" />
             </div>
             <h2 className="text-xl font-bold">Upload Complete!</h2>
             <p className="text-sm text-muted-foreground break-all">{file?.name}</p>
             <p className="text-xs text-muted-foreground">Stored directly in Deep Archive for cost-efficient long-term storage.</p>
             <div className="flex gap-3 justify-center pt-2">
-              <Link href={`/dashboard/archives/${archiveId}`}>
-                <Button size="sm">
-                  <Eye className="mr-2 h-4 w-4" /> View Archive
-                </Button>
-              </Link>
-              <Button variant="outline" size="sm" onClick={resetForm}>
-                <UploadIcon className="mr-2 h-4 w-4" /> Upload Another
-              </Button>
+              <Link href={`/dashboard/archives/${archiveId}`}><Button size="sm"><Eye className="mr-2 h-4 w-4" />View Archive</Button></Link>
+              <Button variant="outline" size="sm" onClick={resetForm}><UploadIcon className="mr-2 h-4 w-4" />Upload Another</Button>
             </div>
           </CardContent>
         </Card>
@@ -77,7 +78,7 @@ export default function UploadPage() {
             <div
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) setFile(f) }}
-              className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 cursor-pointer transition-colors"
+              className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
               onClick={() => fileInputRef.current?.click()}
             >
               <input ref={fileInputRef} type="file" accept=".zip,.tar,.gz,.tar.gz,.7z,.rar" className="hidden"
@@ -85,7 +86,6 @@ export default function UploadPage() {
               <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground text-sm">{file ? "Tap to change file" : "Drop a ZIP archive here or click to browse"}</p>
             </div>
-
             {file && (
               <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg">
                 <FileArchive className="h-5 w-5 text-muted-foreground" />
@@ -96,28 +96,20 @@ export default function UploadPage() {
                 <Button variant="ghost" size="sm" onClick={() => { setFile(null); setSuccess(false) }}>✕</Button>
               </div>
             )}
-
             <div>
               <label className="text-sm font-medium mb-1 block">Description (optional)</label>
-              <Input type="text" value={description} onChange={(e) => setDescription(e.target.value)}
-                placeholder="e.g. Photo backup June 2025" />
+              <Input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. Photo backup June 2025" />
             </div>
-
             {uploading && (
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Uploading...</span>
-                  <span>{progress}%</span>
-                </div>
-                <Progress value={progress} />
+                <div className="flex justify-between text-xs text-muted-foreground"><span>Uploading...</span><span>{progress}%</span></div>
+                <Progress value={progress} className="relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slide" style={{ backgroundSize: "200% 100%" }} />
+                </Progress>
               </div>
             )}
-
             {error && <p className="text-sm text-destructive">{error}</p>}
-
-            <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">
-              {uploading ? "Uploading..." : "Upload Archive"}
-            </Button>
+            <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">{uploading ? "Uploading..." : "Upload Archive"}</Button>
           </CardContent>
         </Card>
       )}

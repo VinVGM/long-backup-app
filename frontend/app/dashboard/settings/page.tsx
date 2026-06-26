@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { getCurrentUserProfile, cancelSubscription, UserProfile } from "@/lib/api"
+import { useToast } from "@/components/ToastProvider"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -28,6 +29,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [cancelMsg, setCancelMsg] = useState("")
+  const toast = useToast()
 
   const loadProfile = () => {
     getCurrentUserProfile().then(setProfile).catch(() => {})
@@ -43,9 +45,11 @@ export default function SettingsPage() {
     try {
       await cancelSubscription()
       setCancelMsg("Plan cancelled. You are now on Free (1 GB).")
+      toast.success("Subscription cancelled", "Downgraded to Free (1 GB)")
       loadProfile()
     } catch {
       setCancelMsg("")
+      toast.error("Cancel failed", "Could not cancel subscription")
     } finally {
       setCancelling(false)
     }

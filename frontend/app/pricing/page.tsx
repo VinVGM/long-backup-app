@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Script from "next/script"
 import { createOrder, getCurrentUserProfile } from "@/lib/api"
+import { useToast } from "@/components/ToastProvider"
+import { fireConfetti } from "@/lib/confetti"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -25,6 +27,7 @@ export default function PricingPage() {
   const [pageLoading, setPageLoading] = useState(true)
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false)
   const [upgradedPlan, setUpgradedPlan] = useState("")
+  const toast = useToast()
 
   useEffect(() => {
     getCurrentUserProfile()
@@ -59,6 +62,8 @@ export default function PricingPage() {
             })
             setUpgradedPlan(planId)
             setShowSuccessOverlay(true)
+            fireConfetti()
+            toast.success("Plan upgraded!", `Welcome to ${plans.find(p => p.id === planId)?.name || ""}`)
             setTimeout(() => { setShowSuccessOverlay(false); router.push("/dashboard/settings") }, 3000)
           } catch { setError("Payment verification failed. Please contact support.") }
         },

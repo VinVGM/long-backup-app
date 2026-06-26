@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { getArchive, initiateRestore, getDownloadUrl, deleteArchive, Archive } from "@/lib/api"
+import { useToast } from "@/components/ToastProvider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -30,6 +31,7 @@ export default function ArchiveDetailPage() {
   const [directDownloadMsg, setDirectDownloadMsg] = useState("")
   const [downloading, setDownloading] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const toast = useToast()
 
   const fetchArchive = useCallback(async () => {
     if (!id) return
@@ -58,11 +60,14 @@ export default function ArchiveDetailPage() {
         setDirectDownloadMsg("This file is still in Standard storage — downloading immediately.")
         setTimeout(() => setDirectDownloadMsg(""), 5000)
         window.open(res.downloadUrl, "_blank")
+        toast.success("Downloading archive", "File is in Standard storage — no restore needed")
       } else {
         setArchive({ ...archive, status: "restoring" })
+        toast.success("Restore initiated", "You'll get an email when it's ready (12-48h)")
       }
     } catch (err: any) {
       setRestoreError(err?.message || "Restore failed")
+      toast.error("Restore failed", err?.message)
     } finally {
       setRestoring(false)
     }
@@ -86,9 +91,11 @@ export default function ArchiveDetailPage() {
     setDeleting(true)
     try {
       await deleteArchive(archive.archiveId)
+      toast.success("Archive deleted", `${archive.filename} has been removed`)
       router.push("/dashboard/archives")
     } catch (err: any) {
       setRestoreError(err?.message || "Delete failed")
+      toast.error("Delete failed", err?.message)
     } finally {
       setDeleting(false)
     }

@@ -61,6 +61,10 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        grid: {
+          "0%": { transform: "translateY(-50%)" },
+          "100%": { transform: "translateY(0)" },
+        },
         "fade-in": {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
@@ -82,6 +86,7 @@ const config: Config = {
         },
       },
       animation: {
+        grid: "grid 15s linear infinite",
         "fade-in": "fade-in 0.5s ease-out",
         "shimmer-slide": "shimmer-slide var(--speed) ease-in-out infinite alternate",
         "spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
