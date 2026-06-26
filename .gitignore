@@ -6,3 +6,4 @@ node_modules/
 backend/build/
 backend/bootstrap
 *.exe
+*.md
