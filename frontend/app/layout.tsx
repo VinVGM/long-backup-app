@@ -5,9 +5,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ToastProvider } from "@/components/ToastProvider"
 
 export const metadata: Metadata = {
-  title: "LongBackup — Affordable Long-Term Cloud Backups",
+  title: "Pathrama-Up — Cloud Backup Platform",
   description:
-    "Store your backups in S3 Glacier Deep Archive at 95% less cost than Google Drive or Dropbox.",
+    "Secure cloud backup platform for storing and restoring your important files.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

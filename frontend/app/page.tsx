@@ -16,7 +16,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <HardDrive className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">LongBackup</span>
+            <span className="font-bold text-xl">Pathrama-Up</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
@@ -178,8 +178,8 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-8 border-t border-border px-6">
         <div className="container mx-auto max-w-5xl flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground"><HardDrive className="h-4 w-4" />LongBackup</div>
-          <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} LongBackup</p>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground"><HardDrive className="h-4 w-4" />Pathrama-Up</div>
+          <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} Pathrama-Up</p>
         </div>
       </footer>
     </div>

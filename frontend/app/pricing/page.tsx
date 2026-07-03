@@ -45,7 +45,7 @@ export default function PricingPage() {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: "LongBackup",
+        name: "Pathrama-Up",
         description: `${order.planName} Plan (${yearly ? "Yearly" : "Monthly"})`,
         order_id: order.orderId,
         prefill: {},

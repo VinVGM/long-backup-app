@@ -62,7 +62,7 @@ export function DashboardSidebar() {
               <div className="flex items-center justify-between p-4 border-b border-border">
                 <Link href="/dashboard/archives" className="flex items-center gap-2 font-bold text-lg">
                   <HardDrive className="h-5 w-5 text-primary" />
-                  <span>LongBackup</span>
+                  <span>Pathrama-Up</span>
                 </Link>
                 <button onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
               </div>
@@ -89,7 +89,7 @@ function SidebarContent({
       <div className="hidden md:block p-4 border-b border-border">
         <Link href="/dashboard/archives" className="flex items-center gap-2 font-bold text-lg">
           <HardDrive className="h-5 w-5 text-primary" />
-          <span>LongBackup</span>
+          <span>Pathrama-Up</span>
         </Link>
       </div>
       <nav className="flex-1 p-3 space-y-1">
