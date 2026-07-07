@@ -12,10 +12,13 @@
 <br />
 
 <div align="center">
-  <img src="./pathramaup.jpeg" alt="Pathrama-Up Logo" width="200" />
   <h1>Pathrama-Up</h1>
   <p><strong>Cloud backup platform with event-driven restore workflows</strong></p>
 </div>
+
+<p align="center">
+  <img src="pathramaup.jpeg" alt="Screenshot of Pathrama-Up Dashboard" width="100%">
+</p>
 
 ---
 
